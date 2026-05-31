@@ -31,67 +31,53 @@ fun RepoList(
     viewModel: RepoListViewModel = viewModel(),
     onNavigateToForm: () -> Unit = {}
 ) {
-
     val repos by viewModel.repos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMsg by viewModel.errorMsg.collectAsState()
 
     Scaffold(
         floatingActionButton = {
-
-            FloatingActionButton(
-                onClick = onNavigateToForm,
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Añadir repositorio"
-                )
+            if (!isLoading && errorMsg == null) {
+                FloatingActionButton(
+                    onClick = onNavigateToForm,
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Añadir repositorio"
+                    )
+                }
             }
         }
     ) { paddingValues ->
-
         Box(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
 
-            when {
+            errorMsg?.let { msg ->
+                Text(
+                    text = msg,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp)
+                )
+            }
 
-                isLoading -> {
-
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-
-                errorMsg != null -> {
-
-                    Text(
-                        text = errorMsg ?: "Error desconocido",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp)
-                    )
-                }
-
-                else -> {
-
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-
-                        items(repos) { repo ->
-
-                            RepoItem(
-                                repository = repo
-                            )
-                        }
+            if (!isLoading && errorMsg == null) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(repos) { repo ->
+                        RepoItem(repository = repo)
                     }
                 }
             }
@@ -102,6 +88,5 @@ fun RepoList(
 @Preview(showBackground = true)
 @Composable
 fun RepoListPreview() {
-
     RepoList()
 }
